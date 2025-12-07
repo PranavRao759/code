@@ -1,75 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Geometry Repository</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Geometry Explorer — Geometry Depositor</title>
 <style>
-    body {
-        background: #0e0e21;
-        color: white;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        margin: 0;
-        padding: 40px;
-    }
-
-    h1 {
-        color: #00eaff;
-        text-shadow: 0 0 10px #00d5ff;
-    }
-
-    .box {
-        background: #1b1b2f;
-        width: 80%;
-        max-width: 450px;
-        margin: auto;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 0 15px #00d5ff77;
-    }
-
-    .btn {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 12px 25px;
-        background: #00eaff;
-        color: black;
-        font-weight: bold;
-        border-radius: 10px;
-        text-decoration: none;
-        font-size: 17px;
-    }
-
-    .btn:hover {
-        background: #009ec2;
-    }
-
-    footer {
-        margin-top: 40px;
-        font-size: 14px;
-        color: #808080;
-    }
+  :root{
+    --bg:#0b0d12;
+    --card:#0f1622;
+    --muted:#9aa7b2;
+    --accent:#00eaff;
+    --accent-2:#00ff99;
+    --glass: rgba(255,255,255,0.03);
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#05060a 0%,var(--bg) 100%);font-family:Inter,Segoe UI,Arial,sans-serif;color:#dbe9f2}
+  .container{max-width:980px;margin:28px auto;padding:28px;}
+  header{display:flex;align-items:center;gap:18px;margin-bottom:22px}
+  .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#006f9a);display:flex;align-items:center;justify-content:center;font-weight:800;color:#021;box-shadow:0 6px 30px rgba(0,224,255,0.07)}
+  h1{margin:0;font-size:20px;color:var(--accent)}
+  p.lead{margin:6px 0 0;color:var(--muted);font-size:14px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),var(--card));border-radius:14px;padding:18px;margin-top:18px;box-shadow:0 8px 30px rgba(2,8,15,0.6);border:1px solid rgba(255,255,255,0.02)}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+  select,input[type="number"],input[type="text"]{width:100%;padding:10px;border-radius:8px;border:none;background:var(--glass);color:inherit;outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02)}
+  .controls{display:grid;grid-template-columns:1fr 160px;gap:12px;align-items:end}
+  .ops{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+  .op-btn{background:transparent;color:#cfeff6;border:1px solid rgba(255,255,255,0.03);padding:10px;border-radius:10px;cursor:pointer;text-align:left}
+  .op-btn.active{border-color:var(--accent);box-shadow:0 6px 30px rgba(0,234,255,0.06);background:linear-gradient(180deg,rgba(0,234,255,0.03),transparent)}
+  .form-area{margin-top:18px;display:grid;gap:12px}
+  .inline{display:flex;gap:10px}
+  .small{font-size:13px;color:var(--muted)}
+  .calc-row{display:flex;gap:12px;align-items:center}
+  button.calc{background:linear-gradient(90deg,var(--accent),#00b7d6);border:none;padding:10px 16px;border-radius:10px;color:#021;font-weight:700;cursor:pointer}
+  button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer}
+  #resultBox{margin-top:16px;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(0,255,153,0.03),transparent);color:var(--accent-2);font-weight:700}
+  footer{margin-top:24px;color:var(--muted);font-size:13px;text-align:center}
+  @media (max-width:600px){
+    .controls{grid-template-columns:1fr}
+    header{flex-direction:column;align-items:flex-start;gap:6px}
+  }
 </style>
 </head>
-
 <body>
+<div class="container">
+  <header>
+    <div class="logo">G</div>
+    <div>
+      <h1>Geometry Explorer</h1>
+      <p class="lead">Select a shape or operation → enter values → get result in SI units (m, m², m³).</p>
+    </div>
+  </header>
 
-<h1>📐 Geometry Repository</h1>
+  <div class="card">
+    <div class="row controls">
+      <div>
+        <label for="operation">Choose operation</label>
+        <select id="operation">
+          <option value="">-- Select operation --</option>
+        </select>
+      </div>
 
-<div class="box">
-    <p>Welcome to the Geometry Repository!<br>
-    All your geometry programs, formulas, and tools in one place.</p>
+      <div>
+        <label for="unit">Input unit</label>
+        <select id="unit">
+          <option value="m">m</option>
+          <option value="cm">cm</option>
+          <option value="mm">mm</option>
+        </select>
+      </div>
+    </div>
 
-    <p>Select a tool from the repository to begin.</p>
+    <div class="ops" id="opsGrid" aria-hidden="true"></div>
 
-    <a href="geometry.py" class="btn">Explore Geometry Tools</a>
+    <div class="card form-area" id="formArea" style="display:none">
+      <div id="inputs"></div>
+
+      <div class="calc-row">
+        <button class="calc" id="calcBtn">Calculate</button>
+        <button class="secondary" id="clearBtn">Clear</button>
+        <div style="flex:1"></div>
+        <div class="small">Result:</div>
+      </div>
+
+      <div id="resultBox" style="display:none"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    Created by Pranav • Geometry Depositor — All results in SI units (converted from selected input unit).
+  </footer>
 </div>
 
-<footer>
-    Created by Pranav Rao • GitHub Pages
-</footer>
+<script>
+/* --------- Conversion helper --------- */
+function toMeters(value, unit){
+  unit = (unit || "").toLowerCase();
+  value = Number(value);
+  if (isNaN(value)) return NaN;
+  if (unit === "cm") return value / 100;
+  if (unit === "mm") return value / 1000;
+  return value;
+}
 
+/* --------- Geometry functions (converted) --------- */
+/* Square */
+function aSquare(a, unit){ a = toMeters(a,unit); return (a*a) + " m²"; }
+function pSquare(a, unit){ a = toMeters(a,unit); return (4*a) + " m"; }
+
+/* Rectangle */
+function aRectangle(a,b,unit){ a=toMeters(a,unit); b=toMeters(b,unit); return (a*b) + " m²"; }
+function pRectangle(a,b,unit){ a=toMeters(a,unit); b=toMeters(b,unit); return (2*(a+b)) + " m"; }
+
+/* Circle */
+function aCircle(r,unit){ r=toMeters(r,unit); return (Math.PI * r * r) + " m²"; }
+function pCircle(r,unit){ r=toMeters(r,unit); return (2 * Math.PI * r) + " m"; }
+
+/* Triangle */
+function pTriangle(a,b,c,unit){ a=toMeters(a,unit); b=toMeters(b,unit); c=toMeters(c,unit); return (a+b+c) + " m"; }
+function aTriangle(a,b,unit){ a=toMeters(a,unit); b=toMeters(b,unit); return ((a*b)/2) + " m²"; }
+
+/* Rhombus (using diagonals) */
+function aRhombus(d1,d2,unit){ d1=toMeters(d1,unit); d2=toMeters(d2,unit); return ((d1*d2)/2) + " m²"; }
+
+/* Cube */
+function tsaCube(a,unit){ a=toMeters(a,unit); return (6 * a * a) + " m²"; }
+function csaCube(a,unit){ a=toMeters(a,unit); return (4 * a * a) + " m²"; }
+function vCube(a,unit){ a=toMeters(a,unit); return (a**3) + " m³"; }
+
+/* Cuboid */
+function tsaCuboid(l,b,h,unit){ l=toMeters(l,unit); b=toMeters(b,unit); h=toMeters(h,unit); return (2*(l*b + b*h + l*h)) + " m²"; }
+function csaCuboid(l,b,h,unit){ l=toMeters(l,unit); b=toMeters(b,unit); h=toMeters(h,unit); return (2*h*(l+b)) + " m²"; }
+function vCuboid(l,b,h,unit){ l=toMeters(l,unit); b=toMeters(b,unit); h=toMeters(h,unit); return (l*b*h) + " m³"; }
+
+/* Cylinder */
+function tsaCylinder(r,h,unit){ r=toMeters(r,unit); h=toMeters(h,unit); return (2 * Math.PI * r * (r + h)) + " m²"; }
+function csaCylinder(r,h,unit){ r=toMeters(r,unit); h=toMeters(h,unit); return (2 * Math.PI * r * h) + " m²"; }
+function vCylinder(r,h,unit){ r=toMeters(r,unit); h=toMeters(h,unit); return (Math.PI * r * r * h) + " m³"; }
+
+/* Cone */
+function tsaCone(r,l,unit){ r=toMeters(r,unit); l=toMeters(l,unit); return (Math.PI * r * (r + l)) + " m²"; }
+function csaCone(r,l,unit){ r=toMeters(r,unit); l=toMeters(l,unit); return (Math.PI * r * l) + " m²"; }
+
+/* Sphere / Hemisphere */
+function tsaSphere(r,unit){ r=toMeters(r,unit); return (4 * Math.PI * r * r) + " m²"; }
+function vSphere(r,unit){ r=toMeters(r,unit); return ((4/3) * Math.PI * r**3) + " m³"; }
+function tsaHemisphere(r,unit){ r=toMeters(r,unit); return (3 * Math.PI * r * r) + " m²"; }
+function csaHemisphere(r,unit){ r=toMeters(r,unit); return (2 * Math.PI * r * r) + " m²"; }
+function vHemisphere(r,unit){ r=toMeters(r,unit); return ((2/3) * Math.PI * r**3) + " m³"; }
+
+/* Equilateral triangle */
+function aEquiTriangle(a,unit){ a=toMeters(a,unit); return ((Math.sqrt(3)/4) * a * a) + " m²"; }
+
+/* Trapezium */
+function aTrapezium(a,b,h,unit){ a=toMeters(a,unit); b=toMeters(b,unit); h=toMeters(h,unit); return (0.5 * (a + b) * h) + " m²"; }
+
+/* --------- Operation registry --------- */
+/* label, functionName, parameterNames (in order) */
+const OPERATIONS = [
+  ["Area of Square", "aSquare", ["side"]],
+  ["Perimeter of Square", "pSquare", ["side"]],
+  ["Area of Rectangle", "aRectangle", ["length","breadth"]],
+  ["Perimeter of Rectangle", "pRectangle", ["length","breadth"]],
+  ["Area of Circle", "aCircle", ["radius"]],
+  ["Circumference of Circle", "pCircle", ["radius"]],
+  ["Perimeter of Triangle", "pTriangle", ["a","b","c"]],
+  ["Area of Right Triangle (1/2 * a * b)", "aTriangle", ["base","height"]],
+  ["Area of Rhombus (½ * d1 * d2)", "aRhombus", ["diagonal1","diagonal2"]],
+  ["Total Surface Area of Cube", "tsaCube", ["side"]],
+  ["Curved Surface Area of Cube (not usual, shows 4a²)", "csaCube", ["side"]],
+  ["Volume of Cube", "vCube", ["side"]],
+  ["Total Surface Area of Cuboid", "tsaCuboid", ["length","breadth","height"]],
+  ["Curved Surface Area of Cuboid (2h(l+b))", "csaCuboid", ["length","breadth","height"]],
+  ["Volume of Cuboid", "vCuboid", ["length","breadth","height"]],
+  ["Total Surface Area of Cylinder", "tsaCylinder", ["radius","height"]],
+  ["Curved Surface Area of Cylinder", "csaCylinder", ["radius","height"]],
+  ["Volume of Cylinder", "vCylinder", ["radius","height"]],
+  ["Total Surface Area of Cone", "tsaCone", ["radius","slantHeight"]],
+  ["Curved Surface Area of Cone", "csaCone", ["radius","slantHeight"]],
+  ["Total Surface Area of Sphere", "tsaSphere", ["radius"]],
+  ["Volume of Sphere", "vSphere", ["radius"]],
+  ["TSA Hemisphere (including base)", "tsaHemisphere", ["radius"]],
+  ["CSA Hemisphere (without base)", "csaHemisphere", ["radius"]],
+  ["Volume of Hemisphere", "vHemisphere", ["radius"]],
+  ["Area of Equilateral Triangle", "aEquiTriangle", ["side"]],
+  ["Area of Trapezium", "aTrapezium", ["a","b","height"]]
+];
+
+/* Populate select + ops grid */
+const opSelect = document.getElementById('operation');
+const opsGrid = document.getElementById('opsGrid');
+OPERATIONS.forEach((op, idx) => {
+  const [label, funcName] = op;
+  const opt = document.createElement('option');
+  opt.value = funcName;
+  opt.textContent = label;
+  opSelect.appendChild(opt);
+
+  const btn = document.createElement('button');
+  btn.className = 'op-btn';
+  btn.textContent = label;
+  btn.onclick = () => { selectOperation(funcName); highlightButton(btn); }
+  opsGrid.appendChild(btn);
+});
+
+/* keep track of active button appearance */
+function highlightButton(activeBtn){
+  Array.from(opsGrid.children).forEach(b => b.classList.remove('active'));
+  activeBtn.classList.add('active');
+}
+
+/* UI logic: show inputs for chosen operation */
+const formArea = document.getElementById('formArea');
+const inputsDiv = document.getElementById('inputs');
+const calcBtn = document.getElementById('calcBtn');
+const clearBtn = document.getElementById('clearBtn');
+const resultBox = document.getElementById('resultBox');
+
+let currentOp = null;
+let currentParams = [];
+
+function selectOperation(funcName){
+  currentOp = funcName;
+  // find operation details
+  const entry = OPERATIONS.find(e => e[1] === funcName);
+  if (!entry) return;
+  const [, , params] = entry;
+  currentParams = params;
+  buildForm(params);
+}
+
+/* also change on select dropdown */
+opSelect.addEventListener('change', (e) => {
+  const v = e.target.value;
+  if (!v) { formArea.style.display = "none"; opsGrid.removeAttribute('aria-hidden'); return; }
+  selectOperation(v);
+  formArea.style.display = "block";
+});
+
+/* build input fields */
+function buildForm(params){
+  inputsDiv.innerHTML = "";
+  const unit = document.getElementById('unit').value;
+  params.forEach(p => {
+    const wrapper = document.createElement('div');
+    const label = document.createElement('label');
+    label.textContent = p.charAt(0).toUpperCase() + p.slice(1).replace(/([A-Z])/g,' $1');
+    wrapper.appendChild(label);
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.step = 'any';
+    inp.id = 'in_' + p;
+    inp.placeholder = p;
+    wrapper.appendChild(inp);
+    inputsDiv.appendChild(wrapper);
+  });
+
+  // show unit hint
+  const hint = document.createElement('div');
+  hint.className = 'small';
+  hint.textContent = "All inputs are in selected unit (" + unit + "). Results converted to SI (m/m²/m³).";
+  inputsDiv.appendChild(hint);
+
+  resultBox.style.display = 'none';
+}
+
+/* perform calculation */
+calcBtn.addEventListener('click', () => {
+  if (!currentOp){ alert("Choose an operation first"); return; }
+  const unit = document.getElementById('unit').value;
+  const args = [];
+  for (let p of currentParams){
+    const v = document.getElementById('in_' + p).value;
+    if (v === "" || v === null){ alert("Enter value for " + p); return; }
+    const num = Number(v);
+    if (isNaN(num)){ alert("Invalid number for " + p); return; }
+    args.push(num);
+  }
+
+  // call function by name
+  try {
+    const fn = window[currentOp];
+    if (typeof fn !== 'function'){ throw new Error("Function not implemented: " + currentOp); }
+    const res = fn(...args, unit);
+    showResult(res);
+  } catch (err) {
+    showResult("Error: " + err.message, true);
+  }
+});
+
+/* clear */
+clearBtn.addEventListener('click', () => {
+  inputsDiv.querySelectorAll('input').forEach(i => i.value = "");
+  resultBox.style.display = 'none';
+});
+
+/* display result */
+function showResult(text, isError=false){
+  resultBox.style.display = 'block';
+  resultBox.style.color = isError ? '#ff8a8a' : 'var(--accent-2)';
+  resultBox.textContent = text;
+}
+
+/* initialize small UI state */
+(function init(){
+  // show grid and hide form until selection
+  formArea.style.display = 'none';
+  opsGrid.removeAttribute('aria-hidden');
+})();
+</script>
 </body>
 </html>
