@@ -5,6 +5,33 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Geometry Explorer — Geometry Depositor</title>
 <style>
+  /* Style dropdown and options */
+select {
+    background: #0f1622;
+    color: #cfeff6;
+    border: 1px solid #00eaff33;
+    border-radius: 8px;
+    padding: 10px;
+    outline: none;
+}
+
+select option {
+    background: #0f1622;
+    color: #cfeff6;
+}
+
+/* Highlight on hover */
+select option:hover {
+    background: #00eaff33 !important;  /* light neon blue */
+    color: #00eaff !important;         /* bright cyan text */
+}
+
+/* Selected option color when highlighted */
+select option:checked {
+    background: #00aacc55 !important;
+    color: #00eaff !important;
+}
+
   :root{
     --bg:#0b0d12;
     --card:#0f1622;
